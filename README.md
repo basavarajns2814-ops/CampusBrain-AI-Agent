@@ -17,8 +17,26 @@ This project is being developed as a complete AI agent ecosystem focused on educ
 - LangChain-based architecture
 - Real-time AI responses
 - Environment variable security using `.env`
+- Conversational memory system
+- Context-aware AI conversations
+- Session-based chat persistence
+- ChatGPT-style chat interface
+- Stateful conversational architecture
+- Role-based message handling
 
 ---
+
+# 🧠 AI Architecture
+
+CampusBrain AI currently uses a conversational AI architecture with:
+
+- Session-based conversational memory
+- Role-based message orchestration
+- System prompts for AI behavior control
+- Full conversation context injection
+- Stateful chat reconstruction using Streamlit
+
+The application simulates conversational memory by storing and resending chat history to the LLM during every interaction.
 
 # 🛠️ Tech Stack
 
@@ -118,7 +136,7 @@ streamlit run app.py
 
 CampusBrain AI aims to evolve into a complete AI student ecosystem with features such as:
 
-- Conversational memory
+
 - PDF-based learning assistant
 - RAG pipeline
 - AI study planner
@@ -136,8 +154,16 @@ CampusBrain AI aims to evolve into a complete AI student ecosystem with features
 - Groq + Llama 3 integration
 - Streamlit interface
 
+## Phase 2
+- Conversational memory system
+- Stateful chat architecture
+- Session-based memory handling
+- Context-aware conversations
+- Chat-style UI using Streamlit
+
+
 ## Upcoming Phases
-- Chat memory
+
 - PDF upload and RAG
 - ChromaDB integration
 - Embeddings and semantic search
