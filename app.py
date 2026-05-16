@@ -19,10 +19,34 @@ llm = ChatGroq(
 st.title("CampusBrain AI")
 st.subheader("Your AI Student Assistant")
 
-# Input box
-user_input = st.text_input("Ask anything")
 
-# AI response
+
+if "chat_history" not in st.session_state:
+        st.session_state.chat_history =[
+            {
+                "role":"system",
+                "content":"You are a helpful assistant."
+            }
+        ]
+for message in st.session_state.chat_history:
+        if message["role"] == "system":
+            continue
+        elif message["role"] == "user":
+           with  st.chat_message("user"):
+                st.write(message["content"])
+        elif message["role"] == "assistant":
+           with  st.chat_message("assistant"):
+                st.write(message["content"])
+
+user_input = st.chat_input("Ask me anything about campus life!")
+
+
 if user_input:
-    response = llm.invoke(user_input)
-    st.write(response.content)
+     st.session_state.chat_history.append({"role":"user","content":user_input})
+
+     response=llm.invoke(st.session_state.chat_history)
+
+     st.session_state.chat_history.append({"role":"assistant","content":response.content})
+
+
+     
