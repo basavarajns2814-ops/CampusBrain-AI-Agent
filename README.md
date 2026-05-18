@@ -38,6 +38,24 @@ CampusBrain AI currently uses a conversational AI architecture with:
 
 The application simulates conversational memory by storing and resending chat history to the LLM during every interaction.
 
+## Current Architecture Flow
+
+User Input  
+↓  
+Streamlit Chat Interface  
+↓  
+LangChain Message Objects  
+↓  
+Conversation Memory Storage  
+↓  
+Groq LLM Inference  
+↓  
+AI Response Generation  
+↓  
+Session State Memory Update  
+↓  
+Chat UI Re-rendering
+
 # 🛠️ Tech Stack
 
 | Technology | Purpose |
@@ -45,9 +63,11 @@ The application simulates conversational memory by storing and resending chat hi
 | Python | Core backend language |
 | Streamlit | Frontend user interface |
 | LangChain | AI application framework |
+| LangChain Message Objects | Conversational memory handling |
 | Groq | High-speed LLM inference |
 | Llama 3.1 | Large Language Model |
 | Git & GitHub | Version control |
+
 
 ---
 
