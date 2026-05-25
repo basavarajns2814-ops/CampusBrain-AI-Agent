@@ -23,7 +23,11 @@ This project is being developed as a complete AI agent ecosystem focused on educ
 - ChatGPT-style chat interface
 - Stateful conversational architecture
 - Role-based message handling
-
+ PDF upload support
+- PDF text extraction pipeline
+- Manual semantic chunking
+- Overlapping chunk generation
+- RAG preprocessing architecture
 ---
 
 # 🧠 AI Architecture
@@ -180,6 +184,12 @@ CampusBrain AI aims to evolve into a complete AI student ecosystem with features
 - Session-based memory handling
 - Context-aware conversations
 - Chat-style UI using Streamlit
+
+## Phase 3
+- PDF upload system
+- PDF text extraction
+- Manual chunking pipeline
+- Overlap-based chunking
 
 
 ## Upcoming Phases
