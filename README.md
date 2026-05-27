@@ -11,6 +11,7 @@ This project is being developed as a complete AI agent ecosystem focused on educ
 # 🚀 Features
 
 ## ✅ Current Features
+
 - AI-powered chatbot
 - Llama 3.1 integration via Groq
 - Interactive Streamlit interface
@@ -22,42 +23,51 @@ This project is being developed as a complete AI agent ecosystem focused on educ
 - Session-based chat persistence
 - ChatGPT-style chat interface
 - Stateful conversational architecture
-- Role-based message handling
- PDF upload support
+
+## ✅ RAG Features
+
+- PDF upload support
 - PDF text extraction pipeline
 - Manual semantic chunking
 - Overlapping chunk generation
-- RAG preprocessing architecture
+- Embedding generation using Sentence Transformers
+- ChromaDB vector database integration
+- Semantic similarity search
+- Retrieval-Augmented Generation (RAG)
+- Context-aware PDF question answering
+- Unified AI + PDF assistant interface
+- Vector-based semantic retrieval
 ---
 
 # 🧠 AI Architecture
 
-CampusBrain AI currently uses a conversational AI architecture with:
+CampusBrain AI currently uses a modular Retrieval-Augmented Generation (RAG) architecture.
 
-- Session-based conversational memory
-- Role-based message orchestration
-- System prompts for AI behavior control
-- Full conversation context injection
-- Stateful chat reconstruction using Streamlit
-
-The application simulates conversational memory by storing and resending chat history to the LLM during every interaction.
+The system combines:
+- Conversational AI
+- Semantic search
+- Vector embeddings
+- Context-aware retrieval
+- PDF-based knowledge augmentation
 
 ## Current Architecture Flow
 
-User Input  
-↓  
-Streamlit Chat Interface  
-↓  
-LangChain Message Objects  
-↓  
-Conversation Memory Storage  
-↓  
-Groq LLM Inference  
-↓  
-AI Response Generation  
-↓  
-Session State Memory Update  
-↓  
+User Question
+↓
+Query Embedding Generation
+↓
+Semantic Search in ChromaDB
+↓
+Relevant PDF Chunk Retrieval
+↓
+Context Augmentation
+↓
+Groq LLM Inference
+↓
+AI Response Generation
+↓
+Session Memory Update
+↓
 Chat UI Re-rendering
 
 # 🛠️ Tech Stack
@@ -71,6 +81,9 @@ Chat UI Re-rendering
 | Groq | High-speed LLM inference |
 | Llama 3.1 | Large Language Model |
 | Git & GitHub | Version control |
+| ChromaDB | Vector database |
+| Sentence Transformers | Embedding generation |
+| RAG Pipeline | Context-aware retrieval |
 
 
 ---
@@ -85,6 +98,11 @@ CampusBrain/
 ├── README.md
 ├── .gitignore
 ├── .env
+│
+├── modules/
+│   ├── __init__.py
+│   ├── chat_assistant.py
+│   ├── pdf_processor.py
 │
 ├── chroma_db/
 ├── uploaded_pdfs/
@@ -190,16 +208,23 @@ CampusBrain AI aims to evolve into a complete AI student ecosystem with features
 - PDF text extraction
 - Manual chunking pipeline
 - Overlap-based chunking
+- Embedding generation
+- ChromaDB vector storage
+- Semantic retrieval pipeline
+- Retrieval-Augmented Generation (RAG)
+- Unified AI + PDF assistant
 
 
 ## Upcoming Phases
 
-- PDF upload and RAG
-- ChromaDB integration
-- Embeddings and semantic search
+- Persistent vector database
+- Multi-PDF support
+- Advanced retrieval optimization
 - AI productivity tools
-- Deployment
-
+- Placement preparation assistant
+- Deployment on Hugging Face Spaces
+- Streaming AI responses
+- Metadata-aware retrieval
 ---
 
 # 🔒 Security
