@@ -1,5 +1,10 @@
 from pypdf import PdfReader
 import streamlit as st
+from sentence_transformers import SentenceTransformer
+
+embedding_model = SentenceTransformer(
+    "all-MiniLM-L6-v2"
+)
 
 
 def pdf_tutor_ui():
@@ -57,9 +62,12 @@ def pdf_tutor_ui():
         # Store in session state
         st.session_state.raw_text = raw_text
         st.session_state.chunks = chunks
+        embeddings = embedding_model.encode(chunks)
+        st.session_state.embeddings = embeddings
 
         # Debugging (temporary)
         st.write(f"Total Chunks Created: {len(chunks)}")
+        st.write(embeddings[0])
         
 
         # Success message
