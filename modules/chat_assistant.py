@@ -1,110 +1,147 @@
 import streamlit as st
-from langchain_groq import ChatGroq
 from dotenv import load_dotenv
+from langchain_groq import ChatGroq
 from langchain_core.messages import (
     SystemMessage,
     HumanMessage,
     AIMessage
 )
 
+from modules.pdf_processor import (
+    process_pdf,
+    retrieve_context
+)
+
 import os
 
-# Load environment variables
+# =========================
+# LOAD ENV VARIABLES
+# =========================
+
 load_dotenv()
 
-# Get API key
 groq_api_key = os.getenv("GROQ_API_KEY")
 
-# Initialize model
+# =========================
+# INITIALIZE LLM
+# =========================
+
 llm = ChatGroq(
     groq_api_key=groq_api_key,
     model_name="llama-3.1-8b-instant"
 )
 
-# Main Chat UI Function
+# =========================
+# SYSTEM PROMPT
+# =========================
+
+SYSTEM_PROMPT = """
+You are CampusBrain AI,
+a smart AI assistant for students.
+
+Your job is to:
+- explain concepts clearly
+- help with coding
+- help with AIML
+- answer academically
+- use uploaded PDF context when available
+
+Keep answers:
+- beginner friendly
+- concise
+- structured
+"""
+
+# =========================
+# MAIN FUNCTION
+# =========================
+
 def chat_assistant_ui():
 
-    # Sidebar
-    with st.sidebar:
+    # =========================
+    # SESSION STATE
+    # =========================
 
-        st.header("CampusBrain")
-
-        st.write("AI-powered student assistant")
-
-        if st.button("Clear Chat"):
-
-            st.session_state.chat_history = [
-
-                SystemMessage(
-                    content="""
-                    You are CampusBrain AI,
-                    a smart AI assistant for college students.
-
-                    Your job is to:
-                    - help students study
-                    - explain AIML concepts simply
-                    - create study plans
-                    - help with coding
-                    - motivate students
-                    - answer clearly and professionally
-
-                    Keep answers:
-                    - beginner friendly
-                    - structured
-                    - concise but useful
-                    """
-                )
-            ]
-
-    # Initialize memory
     if "chat_history" not in st.session_state:
 
         st.session_state.chat_history = [
-
-            SystemMessage(
-                content="""
-                You are CampusBrain AI,
-                a smart AI assistant for college students.
-
-                Your job is to:
-                - help students study
-                - explain AIML concepts simply
-                - create study plans
-                - help with coding
-                - motivate students
-                - answer clearly and professionally
-
-                Keep answers:
-                - beginner friendly
-                - structured
-                - concise but useful
-                """
-            )
+            SystemMessage(content=SYSTEM_PROMPT)
         ]
 
-    # Display chat history
+    # =========================
+    # SIDEBAR
+    # =========================
+
+    with st.sidebar:
+
+        st.title("CampusBrain")
+
+        st.write("AI-powered student assistant")
+
+        uploaded_file = st.file_uploader(
+            "Upload PDF",
+            type="pdf"
+        )
+
+        # Process PDF
+        if uploaded_file is not None:
+
+            total_chunks = process_pdf(
+                uploaded_file
+            )
+
+            st.success(
+                f"PDF processed successfully! ({total_chunks} chunks)"
+            )
+
+        # Clear Chat
+        if st.button("Clear Chat"):
+
+            st.session_state.chat_history = [
+                SystemMessage(content=SYSTEM_PROMPT)
+            ]
+
+    # =========================
+    # MAIN UI
+    # =========================
+
+    st.title("🧠 CampusBrain AI")
+
+    st.subheader(
+        "Your AI Academic Assistant"
+    )
+
+    # =========================
+    # DISPLAY CHAT HISTORY
+    # =========================
+
     for message in st.session_state.chat_history:
 
-        # Skip system prompt
         if isinstance(message, SystemMessage):
             continue
 
-        # User messages
         elif isinstance(message, HumanMessage):
 
             with st.chat_message("user"):
                 st.markdown(message.content)
 
-        # AI messages
         elif isinstance(message, AIMessage):
 
             with st.chat_message("assistant"):
                 st.markdown(message.content)
 
-    # User input
-    user_input = st.chat_input("Ask anything...")
+    # =========================
+    # USER INPUT
+    # =========================
 
-    # Process user message
+    user_input = st.chat_input(
+        "Ask anything..."
+    )
+
+    # =========================
+    # PROCESS USER MESSAGE
+    # =========================
+
     if user_input:
 
         # Display user message
@@ -116,9 +153,36 @@ def chat_assistant_ui():
             HumanMessage(content=user_input)
         )
 
-        # Generate AI response
+        # =========================
+        # RETRIEVE PDF CONTEXT
+        # =========================
+
+        context = retrieve_context(
+            user_input
+        )
+
+        # =========================
+        # AUGMENTED PROMPT
+        # =========================
+
+        augmented_prompt = f"""
+        You are CampusBrain AI.
+
+        Use the PDF context if relevant.
+
+        PDF Context:
+        {context}
+
+        User Question:
+        {user_input}
+        """
+
+        # =========================
+        # GENERATE RESPONSE
+        # =========================
+
         response = llm.invoke(
-            st.session_state.chat_history
+            augmented_prompt
         )
 
         ai_response = response.content
@@ -131,3 +195,5 @@ def chat_assistant_ui():
         st.session_state.chat_history.append(
             AIMessage(content=ai_response)
         )
+        with st.expander("Retrieved PDF Context"):
+         st.write(context)
