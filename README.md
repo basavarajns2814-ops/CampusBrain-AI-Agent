@@ -1,3 +1,13 @@
+---
+title: CampusBrain AI
+emoji: 🧠
+colorFrom: blue
+colorTo: purple
+sdk: streamlit
+sdk_version: 1.45.1
+app_file: app.py
+pinned: false
+---
 # 🧠 CampusBrain AI
 
 An AI-powered academic assistant designed for students.
