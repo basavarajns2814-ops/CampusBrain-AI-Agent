@@ -37,6 +37,13 @@ This project is being developed as a complete AI agent ecosystem focused on educ
 - Context-aware PDF question answering
 - Unified AI + PDF assistant interface
 - Vector-based semantic retrieval
+- Persistent session-based chat history
+- PDF-aware conversational assistant
+- Modular AI application architecture
+- Context inspection through retrieval viewer
+- Intelligent fallback to general AI knowledge
+- PDF processing status indicators
+- Streamlit-based interactive workflow
 ---
 
 # 🧠 AI Architecture
@@ -70,6 +77,28 @@ Session Memory Update
 ↓
 Chat UI Re-rendering
 
+## RAG Processing Pipeline
+
+PDF Upload
+↓
+Text Extraction
+↓
+Chunk Generation
+↓
+Embedding Generation
+↓
+ChromaDB Vector Storage
+↓
+User Question
+↓
+Query Embedding
+↓
+Semantic Retrieval
+↓
+Context Augmentation
+↓
+Groq LLM Response Generation
+
 # 🛠️ Tech Stack
 
 | Technology | Purpose |
@@ -89,7 +118,6 @@ Chat UI Re-rendering
 ---
 
 # 📂 Project Structure
-
 ```plaintext
 CampusBrain/
 │
@@ -102,15 +130,16 @@ CampusBrain/
 ├── modules/
 │   ├── __init__.py
 │   ├── chat_assistant.py
-│   ├── pdf_processor.py
+│   └── pdf_processor.py
 │
 ├── chroma_db/
 ├── uploaded_pdfs/
 ├── data/
+│
+├── screenshots/
+│
 └── venv/
 ```
-
----
 
 # ⚙️ Installation
 
@@ -173,6 +202,16 @@ streamlit run app.py
 ```
 
 ---
+# 📸 Application Preview
+
+### Main Chat Interface
+![alt text](image.png)
+
+### PDF Upload Workflow
+![alt text](image-1.png)
+
+### PDF Question Answering
+![alt text](image-2.png)
 
 # 🎯 Project Goals
 
@@ -186,6 +225,14 @@ CampusBrain AI aims to evolve into a complete AI student ecosystem with features
 - Coding mentor
 - Personalized learning support
 - Deployment on Hugging Face Spaces
+
+## Current Achievements
+
+- Built a complete Retrieval-Augmented Generation (RAG) pipeline
+- Integrated semantic search using vector embeddings
+- Developed a modular AI application architecture
+- Implemented PDF-based knowledge retrieval
+- Created a unified conversational AI experience
 
 ---
 
@@ -214,6 +261,14 @@ CampusBrain AI aims to evolve into a complete AI student ecosystem with features
 - Retrieval-Augmented Generation (RAG)
 - Unified AI + PDF assistant
 
+## Phase 4 (In Progress)
+
+- Deployment preparation
+- Persistent vector database integration
+- Retrieval quality improvements
+- Prompt engineering optimization
+- Improved user experience
+
 
 ## Upcoming Phases
 
@@ -225,6 +280,14 @@ CampusBrain AI aims to evolve into a complete AI student ecosystem with features
 - Deployment on Hugging Face Spaces
 - Streaming AI responses
 - Metadata-aware retrieval
+- Resume Analyzer
+- AI Interview Preparation Assistant
+- Study Planner
+- YouTube Learning Assistant
+- Personalized Student Dashboard
+- PostgreSQL Integration
+- User Authentication
+- Multi-Agent CampusBrain Ecosystem
 ---
 
 # 🔒 Security
@@ -237,12 +300,39 @@ Sensitive files are excluded using `.gitignore`:
 
 ---
 
+# 🌐 Deployment
+
+Deployment targets:
+
+- Hugging Face Spaces
+- Streamlit Community Cloud
+
+Status:
+- Local Development: ✅ Complete
+- Deployment: 🔄 In Progress
+
 # 👨‍💻 Author
 
 **Basavaraj N S**  
 AIML Student | AI Enthusiast | Building AI Systems
 
 ---
+
+# 📊 Current Project Status
+
+| Component | Status |
+|------------|---------|
+| Chat Assistant | ✅ Complete |
+| Groq Integration | ✅ Complete |
+| Conversational Memory | ✅ Complete |
+| PDF Upload System | ✅ Complete |
+| Text Extraction | ✅ Complete |
+| Chunking Pipeline | ✅ Complete |
+| Embedding Generation | ✅ Complete |
+| ChromaDB Integration | ✅ Complete |
+| Semantic Retrieval | ✅ Complete |
+| RAG Pipeline | ✅ Complete |
+| Deployment | 🔄 In Progress |
 
 # ⭐ Future Vision
 
