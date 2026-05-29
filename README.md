@@ -8,6 +8,10 @@ sdk_version: 1.45.1
 app_file: app.py
 pinned: false
 ---
+## Live Demo
+
+https://agentbasava-campusbrain-ai.hf.space
+
 # 🧠 CampusBrain AI
 
 An AI-powered academic assistant designed for students.
