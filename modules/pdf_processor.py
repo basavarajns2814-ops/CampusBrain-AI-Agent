@@ -1,4 +1,5 @@
 from pypdf import PdfReader
+import streamlit as st
 import chromadb
 from sentence_transformers import SentenceTransformer
 
@@ -6,10 +7,12 @@ from sentence_transformers import SentenceTransformer
 # CHROMADB CLIENT
 # =========================
 
-client = chromadb.Client()
+client = chromadb.PersistentClient(
+    path="./chroma_db"
+)
 
 # =========================
-# CREATE / GET COLLECTION
+# COLLECTION
 # =========================
 
 collection = client.get_or_create_collection(
@@ -30,13 +33,22 @@ embedding_model = SentenceTransformer(
 
 def process_pdf(uploaded_file):
 
+    global collection
+
+    # Reset previous PDF vectors
+    try:
+        client.delete_collection("pdf_chunks")
+    except:
+        pass
+
+    collection = client.get_or_create_collection(
+        name="pdf_chunks"
+    )
+
     # Read PDF
     reader = PdfReader(uploaded_file)
 
-    # Store extracted text
     raw_text = ""
-
-    # Store chunks
     chunks = []
 
     # =========================
@@ -47,7 +59,6 @@ def process_pdf(uploaded_file):
 
         text = page.extract_text()
 
-        # Avoid None issues
         if text:
             raw_text += text
 
@@ -62,32 +73,33 @@ def process_pdf(uploaded_file):
 
     while start < len(raw_text):
 
-        # Define chunk window
         end = start + chunk_size
 
-        # Extract chunk
         chunk = raw_text[start:end]
 
-        # Store chunk
         chunks.append(chunk)
 
-        # Move window with overlap
         start = end - overlap
 
     # =========================
-    # GENERATE EMBEDDINGS
+    # EMBEDDINGS
     # =========================
 
-    embeddings = embedding_model.encode(chunks)
+    embeddings = embedding_model.encode(
+        chunks
+    )
 
     # =========================
-    # CREATE IDS
+    # IDS
     # =========================
 
     ids = []
 
     for i in range(len(chunks)):
-        ids.append(f"chunk_{i}")
+
+        ids.append(
+            f"chunk_{i}"
+        )
 
     # =========================
     # STORE IN CHROMADB
@@ -99,7 +111,16 @@ def process_pdf(uploaded_file):
         ids=ids
     )
 
-    # Return useful info
+    # =========================
+    # SESSION STATE
+    # =========================
+
+    st.session_state.pdf_uploaded = True
+
+    st.session_state.chunk_count = len(
+        chunks
+    )
+
     return len(chunks)
 
 # =========================
@@ -108,12 +129,10 @@ def process_pdf(uploaded_file):
 
 def retrieve_context(question):
 
-    # Convert question to embedding
     query_embedding = embedding_model.encode(
         question
     )
 
-    # Search nearest chunks
     results = collection.query(
         query_embeddings=[
             query_embedding.tolist()
@@ -121,10 +140,12 @@ def retrieve_context(question):
         n_results=3
     )
 
-    # Extract retrieved chunks
-    retrieved_chunks = results["documents"][0]
+    retrieved_chunks = results[
+        "documents"
+    ][0]
 
-    # Combine into single context
-    context = "\n".join(retrieved_chunks)
+    context = "\n".join(
+        retrieved_chunks
+    )
 
     return context

@@ -83,23 +83,52 @@ def chat_assistant_ui():
             type="pdf"
         )
 
-        # Process PDF
-        if uploaded_file is not None:
+        # Process PDF only once
+        if uploaded_file is not None and (
+            st.session_state.get("last_pdf")
+            != uploaded_file.name
+        ):
 
-            total_chunks = process_pdf(
-                uploaded_file
+            with st.spinner(
+                "Processing PDF..."
+            ):
+
+                total_chunks = process_pdf(
+                    uploaded_file
+                )
+
+            st.session_state.last_pdf = (
+                uploaded_file.name
             )
 
             st.success(
                 f"PDF processed successfully! ({total_chunks} chunks)"
             )
 
+        if uploaded_file is not None:
+
+            st.caption(
+                f"📄 {uploaded_file.name}"
+            )
+
         # Clear Chat
         if st.button("Clear Chat"):
 
             st.session_state.chat_history = [
-                SystemMessage(content=SYSTEM_PROMPT)
+                SystemMessage(
+                    content=SYSTEM_PROMPT
+                )
             ]
+
+            st.session_state.pop(
+                "pdf_uploaded",
+                None
+            )
+
+            st.session_state.pop(
+                "last_pdf",
+                None
+            )
 
     # =========================
     # MAIN UI
@@ -117,18 +146,35 @@ def chat_assistant_ui():
 
     for message in st.session_state.chat_history:
 
-        if isinstance(message, SystemMessage):
+        if isinstance(
+            message,
+            SystemMessage
+        ):
             continue
 
-        elif isinstance(message, HumanMessage):
+        elif isinstance(
+            message,
+            HumanMessage
+        ):
 
-            with st.chat_message("user"):
-                st.markdown(message.content)
+            with st.chat_message(
+                "user"
+            ):
+                st.markdown(
+                    message.content
+                )
 
-        elif isinstance(message, AIMessage):
+        elif isinstance(
+            message,
+            AIMessage
+        ):
 
-            with st.chat_message("assistant"):
-                st.markdown(message.content)
+            with st.chat_message(
+                "assistant"
+            ):
+                st.markdown(
+                    message.content
+                )
 
     # =========================
     # USER INPUT
@@ -139,61 +185,98 @@ def chat_assistant_ui():
     )
 
     # =========================
-    # PROCESS USER MESSAGE
+    # PROCESS MESSAGE
     # =========================
 
     if user_input:
 
         # Display user message
-        with st.chat_message("user"):
-            st.markdown(user_input)
+        with st.chat_message(
+            "user"
+        ):
+            st.markdown(
+                user_input
+            )
 
         # Store user message
         st.session_state.chat_history.append(
-            HumanMessage(content=user_input)
+            HumanMessage(
+                content=user_input
+            )
         )
 
         # =========================
         # RETRIEVE PDF CONTEXT
         # =========================
 
-        context = retrieve_context(
-            user_input
-        )
+        context = ""
+
+        if st.session_state.get(
+            "pdf_uploaded",
+            False
+        ):
+
+            context = retrieve_context(
+                user_input
+            )
+
+            if context:
+
+                with st.expander(
+                    "Retrieved PDF Context"
+                ):
+                    st.write(
+                        context
+                    )
 
         # =========================
         # AUGMENTED PROMPT
         # =========================
 
         augmented_prompt = f"""
-        You are CampusBrain AI.
+You are CampusBrain AI.
 
-        Use the PDF context if relevant.
+Instructions:
+- Use the PDF context if it contains relevant information.
+- If the answer is not available in the PDF, use your own knowledge.
+- Clearly mention when information comes from the PDF.
+- Keep answers structured and easy to understand.
+- Prefer bullet points when useful.
 
-        PDF Context:
-        {context}
+PDF Context:
+{context}
 
-        User Question:
-        {user_input}
-        """
+Question:
+{user_input}
+"""
 
         # =========================
         # GENERATE RESPONSE
         # =========================
 
-        response = llm.invoke(
-            augmented_prompt
+        with st.spinner(
+            "Generating response..."
+        ):
+
+            response = llm.invoke(
+                augmented_prompt
+            )
+
+        ai_response = (
+            response.content
         )
 
-        ai_response = response.content
-
         # Display AI response
-        with st.chat_message("assistant"):
-            st.markdown(ai_response)
+        with st.chat_message(
+            "assistant"
+        ):
+            st.markdown(
+                ai_response
+            )
 
         # Store AI response
         st.session_state.chat_history.append(
-            AIMessage(content=ai_response)
+            AIMessage(
+                content=ai_response
+            )
         )
-        with st.expander("Retrieved PDF Context"):
-         st.write(context)
