@@ -1,6 +1,8 @@
 from pypdf import PdfReader
 import streamlit as st
 import chromadb
+import uuid
+
 from sentence_transformers import SentenceTransformer
 
 # =========================
@@ -35,93 +37,112 @@ def process_pdf(uploaded_file):
 
     global collection
 
-    # Reset previous PDF vectors
     try:
-        client.delete_collection("pdf_chunks")
-    except:
-        pass
 
-    collection = client.get_or_create_collection(
-        name="pdf_chunks"
-    )
+        # Read PDF
+        reader = PdfReader(uploaded_file)
 
-    # Read PDF
-    reader = PdfReader(uploaded_file)
+        raw_text = ""
+        chunks = []
 
-    raw_text = ""
-    chunks = []
+        # =========================
+        # TEXT EXTRACTION
+        # =========================
 
-    # =========================
-    # TEXT EXTRACTION
-    # =========================
+        for page in reader.pages:
 
-    for page in reader.pages:
+            text = page.extract_text()
 
-        text = page.extract_text()
+            if text:
+                raw_text += text
 
-        if text:
-            raw_text += text
+        # =========================
+        # CHUNKING
+        # =========================
 
-    # =========================
-    # CHUNKING
-    # =========================
+        chunk_size = 500
+        overlap = 100
 
-    chunk_size = 500
-    overlap = 100
+        start = 0
 
-    start = 0
+        while start < len(raw_text):
 
-    while start < len(raw_text):
+            end = start + chunk_size
 
-        end = start + chunk_size
+            chunk = raw_text[start:end]
 
-        chunk = raw_text[start:end]
+            chunks.append(chunk)
 
-        chunks.append(chunk)
+            start = end - overlap
 
-        start = end - overlap
+        # =========================
+        # EMBEDDINGS
+        # =========================
 
-    # =========================
-    # EMBEDDINGS
-    # =========================
-
-    embeddings = embedding_model.encode(
-        chunks
-    )
-
-    # =========================
-    # IDS
-    # =========================
-
-    ids = []
-
-    for i in range(len(chunks)):
-
-        ids.append(
-            f"chunk_{i}"
+        embeddings = embedding_model.encode(
+            chunks
         )
 
-    # =========================
-    # STORE IN CHROMADB
-    # =========================
+        # =========================
+        # UUID IDS
+        # =========================
 
-    collection.add(
-        documents=chunks,
-        embeddings=embeddings.tolist(),
-        ids=ids
-    )
+        ids = [
+            str(uuid.uuid4())
+            for _ in chunks
+        ]
 
-    # =========================
-    # SESSION STATE
-    # =========================
+        # =========================
+        # METADATA
+        # =========================
 
-    st.session_state.pdf_uploaded = True
+        metadatas = [
+            {
+                "source": uploaded_file.name,
+                "chunk_index": i
+            }
+            for i in range(len(chunks))
+        ]
 
-    st.session_state.chunk_count = len(
-        chunks
-    )
+        # =========================
+        # STORE IN CHROMADB
+        # =========================
 
-    return len(chunks)
+        collection.add(
+            documents=chunks,
+            embeddings=embeddings.tolist(),
+            ids=ids,
+            metadatas=metadatas
+        )
+
+        # =========================
+        # SESSION STATE
+        # =========================
+
+        st.session_state.pdf_uploaded = True
+
+        if "uploaded_pdfs" not in st.session_state:
+            st.session_state.uploaded_pdfs = []
+
+        if uploaded_file.name not in st.session_state.uploaded_pdfs:
+            st.session_state.uploaded_pdfs.append(
+                uploaded_file.name
+            )
+
+        st.session_state.chunk_count = len(
+            chunks
+        )
+
+        return len(chunks)
+
+    except Exception as e:
+
+        st.error(
+            f"PDF Processing Error: {str(e)}"
+        )
+
+        return 0
+
 
 # =========================
 # RETRIEVAL FUNCTION
@@ -137,15 +158,32 @@ def retrieve_context(question):
         query_embeddings=[
             query_embedding.tolist()
         ],
-        n_results=3
+        n_results=5,
+        include=[
+            "documents",
+            "metadatas",
+            "distances"
+        ]
     )
 
     retrieved_chunks = results[
         "documents"
     ][0]
 
+    distances = results[
+        "distances"
+    ][0]
+
+    metadata = results[
+        "metadatas"
+    ][0]
+
     context = "\n".join(
         retrieved_chunks
     )
 
-    return context
+    return (
+        context,
+        distances,
+        metadata
+    )

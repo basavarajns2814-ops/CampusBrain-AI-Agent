@@ -28,7 +28,8 @@ groq_api_key = os.getenv("GROQ_API_KEY")
 
 llm = ChatGroq(
     groq_api_key=groq_api_key,
-    model_name="llama-3.1-8b-instant"
+    model_name="llama-3.1-8b-instant",
+    temperature=0.3
 )
 
 # =========================
@@ -76,17 +77,41 @@ def chat_assistant_ui():
 
         st.title("CampusBrain")
 
-        st.write("AI-powered student assistant")
+        st.write(
+            "AI-powered student assistant"
+        )
+
+        # =========================
+        # SHOW UPLOADED PDFS
+        # =========================
+
+        if "uploaded_pdfs" in st.session_state:
+
+            st.markdown(
+                "### Uploaded PDFs"
+            )
+
+            for pdf in st.session_state.uploaded_pdfs:
+
+                st.write(
+                    f"📄 {pdf}"
+                )
 
         uploaded_file = st.file_uploader(
             "Upload PDF",
             type="pdf"
         )
 
-        # Process PDF only once
+        # =========================
+        # PROCESS PDF
+        # =========================
+
         if uploaded_file is not None and (
-            st.session_state.get("last_pdf")
-            != uploaded_file.name
+            uploaded_file.name
+            not in st.session_state.get(
+                "uploaded_pdfs",
+                []
+            )
         ):
 
             with st.spinner(
@@ -96,10 +121,6 @@ def chat_assistant_ui():
                 total_chunks = process_pdf(
                     uploaded_file
                 )
-
-            st.session_state.last_pdf = (
-                uploaded_file.name
-            )
 
             st.success(
                 f"PDF processed successfully! ({total_chunks} chunks)"
@@ -111,7 +132,10 @@ def chat_assistant_ui():
                 f"📄 {uploaded_file.name}"
             )
 
-        # Clear Chat
+        # =========================
+        # CLEAR CHAT
+        # =========================
+
         if st.button("Clear Chat"):
 
             st.session_state.chat_history = [
@@ -126,7 +150,7 @@ def chat_assistant_ui():
             )
 
             st.session_state.pop(
-                "last_pdf",
+                "uploaded_pdfs",
                 None
             )
 
@@ -185,12 +209,11 @@ def chat_assistant_ui():
     )
 
     # =========================
-    # PROCESS MESSAGE
+    # PROCESS USER MESSAGE
     # =========================
 
     if user_input:
 
-        # Display user message
         with st.chat_message(
             "user"
         ):
@@ -198,7 +221,6 @@ def chat_assistant_ui():
                 user_input
             )
 
-        # Store user message
         st.session_state.chat_history.append(
             HumanMessage(
                 content=user_input
@@ -210,14 +232,18 @@ def chat_assistant_ui():
         # =========================
 
         context = ""
+        distances = []
+        metadata = []
 
         if st.session_state.get(
             "pdf_uploaded",
             False
         ):
 
-            context = retrieve_context(
-                user_input
+            context, distances, metadata = (
+                retrieve_context(
+                    user_input
+                )
             )
 
             if context:
@@ -227,6 +253,20 @@ def chat_assistant_ui():
                 ):
                     st.write(
                         context
+                    )
+
+                with st.expander(
+                    "Retrieval Details"
+                ):
+
+                    st.write(
+                        "Distances:",
+                        distances
+                    )
+
+                    st.write(
+                        "Sources:",
+                        metadata
                     )
 
         # =========================
@@ -266,7 +306,6 @@ Question:
             response.content
         )
 
-        # Display AI response
         with st.chat_message(
             "assistant"
         ):
@@ -274,7 +313,6 @@ Question:
                 ai_response
             )
 
-        # Store AI response
         st.session_state.chat_history.append(
             AIMessage(
                 content=ai_response
